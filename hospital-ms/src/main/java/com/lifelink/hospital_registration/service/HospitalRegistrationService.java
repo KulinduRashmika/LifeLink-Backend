@@ -96,6 +96,19 @@ public class HospitalRegistrationService {
         return response;
     }
 
+    // ✅ NEW METHOD: Fetch hospital by UID
+    public Hospital getHospitalByUid(String uid) {
+        try {
+            DocumentSnapshot document = firestore.collection(COLLECTION_NAME).document(uid).get().get();
+            if (document.exists()) {
+                return document.toObject(Hospital.class);
+            }
+        } catch (Exception e) {
+            log.error("Error retrieving hospital with UID: {}", uid, e);
+        }
+        return null;
+    }
+
     private boolean isEmailAlreadyRegistered(String email) throws ExecutionException, InterruptedException {
         CollectionReference hospitals = firestore.collection(COLLECTION_NAME);
         Query query = hospitals.whereEqualTo("officialEmail", email);

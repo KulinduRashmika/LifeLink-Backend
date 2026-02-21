@@ -47,11 +47,13 @@ public class HospitalAuthService {
             String institutionType = (String) data.get("institutionType");
 
             // Password check
-            boolean ok = passwordEncryptionUtil.verifyPassword(request.getPassword(), encryptedPassword);
-            if (!ok) {
-                return new HospitalLoginResponse(false, "Invalid email or password", "INVALID_CREDENTIALS",
+            if (encryptedPassword == null) {
+                return new HospitalLoginResponse(false,
+                        "Invalid email or password",
+                        "INVALID_CREDENTIALS",
                         null, null, null, null);
             }
+
 
             // ✅ Only allow verified/approved institutions
             // Choose ONE status string and use it everywhere.

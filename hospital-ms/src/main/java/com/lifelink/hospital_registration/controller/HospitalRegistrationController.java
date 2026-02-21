@@ -61,4 +61,19 @@ public class HospitalRegistrationController {
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.badRequest().body(response);
     }
+
+    // ✅ New GET method to fetch hospital data by UID
+    @GetMapping("/{uid}")
+    public ResponseEntity<?> getHospitalProfile(@PathVariable String uid) {
+        log.info("Fetching data for hospital UID: {}", uid);
+
+        // This calls the service to get data from Firebase
+        Object hospitalData = registrationService.getHospitalByUid(uid);
+
+        if (hospitalData != null) {
+            return ResponseEntity.ok(hospitalData);
+        } else {
+            return ResponseEntity.status(404).body("Hospital record not found in Firebase");
+        }
+    }
 }
