@@ -7,6 +7,8 @@ import com.lifelink.donorms.model.Donor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.lifelink.donorms.model.Donation;
+import java.util.ArrayList;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -115,5 +117,61 @@ public class DonorService {
         }
 
         return donor;
+    }
+    // ==========================
+// GET DONATIONS BY EMAIL
+// ==========================
+    public List<Donation> getDonationsByEmail(String email) throws Exception {
+
+        List<Donation> donationList = new ArrayList<>();
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        ApiFuture<QuerySnapshot> future =
+                db.collection("donations")
+                        .whereEqualTo("donorEmail", email)
+                        .get();
+
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        for (QueryDocumentSnapshot document : documents) {
+            Donation donation = document.toObject(Donation.class);
+            donation.setId(document.getId());
+            donationList.add(donation);
+        }
+
+        return donationList;
+    }
+    // ==========================
+// SAVE DONATION
+// ==========================
+    public String saveDonation(Donation donation) throws Exception {
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        String donationId = UUID.randomUUID().toString();
+        donation.setId(donationId);
+
+        db.collection("donations")
+                .document(donationId)
+                .set(donation);
+
+        // 🔥 Update donor lastDonationDate
+        if ("Completed".equalsIgnoreCase(donation.getStatus())) {
+
+            ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME)
+                    .whereEqualTo("email", donation.getDonorEmail())
+                    .get();
+
+            List<QueryDocumentSnapshot> docs = future.get().getDocuments();
+
+            if (!docs.isEmpty()) {
+                db.collection(COLLECTION_NAME)
+                        .document(docs.get(0).getId())
+                        .update("lastDonationDate", donation.getDate());
+            }
+        }
+
+        return donationId;
     }
 }

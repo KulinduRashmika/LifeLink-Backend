@@ -1,5 +1,6 @@
 package com.lifelink.donorms.controller;
 
+import com.lifelink.donorms.model.Donation;
 import com.lifelink.donorms.model.Donor;
 import com.lifelink.donorms.service.DonorService;
 import org.springframework.http.HttpStatus;
@@ -7,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/donor")   // 🔥 changed from donors → donor
+@RequestMapping("/api/donor")
 @CrossOrigin(origins = "http://localhost:3000")
 public class DonorController {
 
@@ -53,5 +56,15 @@ public class DonorController {
         }
 
         return ResponseEntity.ok(donor);
+    }
+
+    @GetMapping("/donations")
+    public ResponseEntity<List<Donation>> getDonations(@RequestParam String email) throws Exception {
+        return ResponseEntity.ok(donorService.getDonationsByEmail(email));
+    }
+
+    @PostMapping("/donations")
+    public ResponseEntity<String> saveDonation(@RequestBody Donation donation) throws Exception {
+        return ResponseEntity.ok(donorService.saveDonation(donation));
     }
 }
